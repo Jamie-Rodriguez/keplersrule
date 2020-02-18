@@ -16,7 +16,6 @@ import Lib (integrate)
 
 -- Data.Csv doesn't allow for encoding Rational numbers?
 data TrainingData = TrainingData {
-                                   radius :: Double,
                                    x1     :: Double,
                                    x2     :: Double,
                                    area   :: Double
@@ -47,22 +46,19 @@ main = do
 
 
         -- How many samples of training data to take for 0 <= x <= r
-        let samples = 100
+        let samples = 1000
         -- How many subdivisions to use for Kepler's method
         -- (more subdivisions = more accurate approximation)
-        let n = 1000
+        let n = 4000
 
-        let rInc = 0.1 :: Rational
-        let rStart = 0.1 :: Rational
-        let rEnd = 10 :: Rational
-        let rSecond = rStart + rInc
+        let r = 1 :: Rational
+        let delta = r/samples
 
 
-        let trainingData = [ TrainingData (fromRational r) (fromRational a) (fromRational b) i | r <- [rStart, rSecond .. rEnd] :: [Rational],
-                                                                                                 let delta = r/samples,
-                                                                                                 a <- [0, delta     .. r]       :: [Rational],
-                                                                                                 b <- [a, (a+delta) .. r]       :: [Rational],
-                                                                                                 let i = integrate (semiCircle (fromRational r)) (fromRational a) (fromRational b) n]
+        let trainingData = [ TrainingData (fromRational a) (fromRational b) i | a <- [0, delta .. r]     :: [Rational],
+                                                                                b <- [a, (a+delta) .. r] :: [Rational],
+                                                                                let i = integrate (semiCircle (fromRational r)) (fromRational a) (fromRational b) n]
+
 
         let csvData = encodeDefaultOrderedByName trainingData
         writeFile filepath csvData
